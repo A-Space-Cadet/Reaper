@@ -1,0 +1,31 @@
+desc:Phaserizer
+//author: ASpaceCadet
+
+slider1:0<0, 20000, 1>Frequency(Hz)
+slider2:-120<-120, -1, 1>Feedback (dB)
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@slider
+feedback = 2^(slider2 / 6);
+delta = slider1 * 2 / srate;
+
+@sample
+coef = (1 - delta) / (1 + delta);
+
+x1 = spl0 + ly4 * feedback;
+ly1 = coef * (ly1 + x1) - lx1;  lx1 = x1;
+ly2 = coef * (ly2 + ly1) - lx2; lx2 = ly1;
+ly3 = coef * (ly3 + ly2) - lx3; lx3 = ly2;
+ly4 = coef * (ly4 + ly3) - lx4; lx4 = ly3;
+spl0 += ly4;
+
+rx = spl1 + ry4 * feedback;
+ry1 = coef * (ry1 + rx) - rx1;  rx1 = rx;
+ry2 = coef * (ry2 + ry1) - rx2; rx2 = ry1;
+ry3 = coef * (ry3 + ry2) - rx3; rx3 = ry2;
+ry4 = coef * (ry4 + ry3) - rx4; rx4 = ry3;
+spl1 += ry4;

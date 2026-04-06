@@ -1,0 +1,30 @@
+desc:Stereoizer
+//author: ASpaceCadet
+
+slider1:5<0,50,0.1>Delay (ms)
+slider2:1<0,2,0.01>Width
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@slider
+bufsize = slider1 / 1000 * srate;
+
+@sample
+mid = (spl0 + spl1) / 2;
+side = (spl0 - spl1) / 2;
+
+slider1 > 0 ? ( // bypass if delay is 0
+  // delay (written directly to the side channel)
+  bufpos[0] = mid;
+  bufpos = bufpos + 1;
+  bufpos >= bufsize ? bufpos = 0;
+  side = bufpos[0];
+);
+
+side = side * slider2;
+
+spl0 = mid - side;
+spl1 = mid + side;
