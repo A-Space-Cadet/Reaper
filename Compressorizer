@@ -1,0 +1,37 @@
+desc:Compressorizer
+//author: ASpaceCadet
+
+slider1:0<-60,24,1>Input Gain (dB)
+slider2:0<-60,24,1>Threshold (dB)
+slider3:1<1,20,0.1>Ratio
+slider4:0<-60,24,1>Output Gain (dB)
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+input_scalar=10^(slider1/20);
+threshold=10^(slider2/20);
+output_scalar=10^(slider4/20);
+ratio=slider3==20?(999999999999):(slider3)
+
+@slider
+input_scalar=10^(slider1/20);
+threshold=10^(slider2/20);
+output_scalar=10^(slider4/20);
+ratio=slider3==20?(999999999999):(slider3)
+
+@sample
+loop(num_ch,
+  spl(i)*=input_scalar;                         //scale the sample by the input gain
+  spl_sign=(spl(i)>0)?(1):(-1);                 //make note of the sign (+/-) of the sample
+  spl(i)=abs(spl(i));                           //make the sample positive
+  overshoot=max(0,spl(i)-threshold);            //calculate how far over the threshold the sample went
+  gr=overshoot-(overshoot/ratio);
+  spl(i)=spl(i)-gr;    //apply the gain reduction
+  spl(i)*=spl_sign;                             //return the original sign of the sample
+  spl(i)*=output_scalar;                        //scale the sample by the output gain
+  i+=1);                                        //increment i
+i=0;                                            //reset i
